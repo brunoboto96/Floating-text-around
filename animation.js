@@ -18,69 +18,68 @@ function floatyText() {
     isLooping()
     var inputText = document.getElementById("textBox").value;
     console.log(inputText)
-    for (let i = 0; i < inputText.length; i++) {
-        animationStart(inputText[i], i)
+    let x = 0
+    for (let i = inputText.length - 1; i >= 0; i--) {
+        animationStart(inputText[i], x, 0)
+        x++
     }
 }
 
-function animationStart(txt, l) {
-    console.log(txt)
-    var para = document.createElement("span"); // Create a <p> element
-    para.innerText = txt; // Insert text
-    para.id = "output" + Math.random()
-    para.style.position = "absolute"
-
-    mtop = 30 * l //spacing
-    para.style.top = mtop + "px"
-    document.body.appendChild(para);
-    //console.log(para.offsetTop)
-    //console.log(window.innerHeight)
-    //console.log("mtop", mtop)
-
-    offtop = mtop + (para.offsetHeight * l) + 60
-        //console.log("offtop", offtop)
-
-    var pos = 0 + mtop;
-    var id = setInterval(frame, 5);
+function animationStart(txt, l, total) {
+    var speed = 5
+    var w = null
+    var id = null
+    var pos = 0;
+    var para = document.createElement("span"); // Create a <span> element
+    let marginUp = 10
     let posY = 0
     var leftie = null
     var upup = null
+    let wc = 0 //waiting counter
+
+    para.innerText = txt; // Insert text
+    para.id = "output" + Math.random()
+    para.style.position = "absolute"
+    para.style.top = "0px"
+    document.body.appendChild(para);
+    console.log(txt, l, total)
+
+    if (total == 0)
+        w = setInterval(waiting, speed)
+    else {
+        id = setInterval(frame, speed);
+    }
+
+    function waiting() {
+        let queue = (l + 1) * (para.offsetHeight + marginUp)
+        if (queue <= wc) {
+            console.log("go: ", txt)
+            clearInterval(w)
+            w = null
+            id = setInterval(frame, speed);
+        } else {
+            wc++
+        }
+    }
 
     function frame() {
         if (pos >= window.innerHeight - para.offsetHeight) {
             clearInterval(id);
-
-            console.log("posY: ", posY)
+            id = null
             pos = 0
-            leftie = setInterval(goLeft, 5)
-                //console.log("id: ", id)
-                //console.log("leftie: ", leftie)
-
-
+            leftie = setInterval(goLeft, speed)
         } else {
-            //console.log("top: ", para.offsetTop)
             pos++;
             para.style.top = pos + 'px';
         }
     }
 
     function goLeft() {
-        if (para.offsetTop > window.innerHeight - para.offsetHeight)
-            para.style.top = window.innerWidth - para.offsetWidth + "px"
         if (pos >= window.innerWidth - para.offsetWidth) {
-            //console.log("pos: ", pos)
-            //pos = window.innerWidth
             clearInterval(leftie)
-
-
-            upup = setInterval(goUp, 5)
-
-            //console.log("leftie: ", leftie)
-            //console.log("up: ", upup)
-
-
+            leftie = null
+            upup = setInterval(goUp, speed)
         } else {
-            //console.log("left: ", txt, para.offsetLeft)
             pos++
             para.style.left = pos + "px"
         }
@@ -89,18 +88,15 @@ function animationStart(txt, l) {
 
     function goUp() {
         posY = para.offsetTop
-        if (para.offsetLeft > window.innerWidth - para.offsetWidth)
-            para.style.left = window.innerWidth - para.offsetWidth + "px"
         if (posY <= para.offsetHeight) {
             console.log("Finished ", txt)
             clearInterval(upup)
+            upup = null
             para.remove()
-            if (isLooping())
-                floatyText()
+            if (isLooping()) {
+                animationStart(txt, l, 1)
+            } else {}
         } else {
-            //console.log("top: ", txt, para.offsetTop)
-            //console.log("posY: ", txt, posY)
-
             posY--
             para.style.top = posY + "px"
         }
